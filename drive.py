@@ -22,15 +22,6 @@ app = Flask(__name__)
 model = None
 prev_image_array = None
 img_gen = None
-shape = (80,160)
-mask = np.zeros((80,160,3))
-mask[0:27,:,:] = 0
-mask[27:65,:,:] = 1
-mask[65:,:,:] = 0
-#mask = np.zeros((160,320,3))
-#mask[0:55,:,:] = 0
-#mask[55:130,:,:] = 1
-#mask[130:,:,:] = 0
 
 
 @sio.on('telemetry')
@@ -52,9 +43,8 @@ def telemetry(sid, data):
     image = Image.open(BytesIO(base64.b64decode(imgString)))
     image_array = np.asarray(image)
     image_array = sp.imresize(image_array, size=shape, interp='cubic')
-    image_array = image_array[27:65,:]              
-    #image_array = np.multiply(image_array,mask).astype(np.uint8)
-    #print(image_array.shape, image_array.sum())
+    image_array = image_array[27:65,:]
+    
 
     
     a = -0.5
@@ -67,7 +57,7 @@ def telemetry(sid, data):
 
 
     transformed_image_array = image_array[None, :, :, :]
-    #print(transformed_image_array.shape)
+    
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
     
 
