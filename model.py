@@ -122,7 +122,7 @@ model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
 
 #Train
 history = model.fit(X_normalized, y_train, 
-	nb_epoch=2, 
+	nb_epoch=5, 
 	validation_split=0.05)
  	
 #Save Model
