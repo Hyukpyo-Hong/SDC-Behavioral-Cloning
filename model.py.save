@@ -34,7 +34,6 @@ from keras.layers.core import Dense, Activation, Flatten, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D   
 from keras.layers.advanced_activations import ELU
-from keras.optimizers import Adam
 
 def model_1():
 	model = Sequential()
@@ -53,7 +52,7 @@ def model_1():
 def model_2():
 	model = Sequential()
 	#input(80,160,3) output(24,88,24)
-	model.add(Convolution2D(24, 5, 5,input_shape=(80, 160, 3),subsample=(2, 2)))	
+	model.add(Convolution2D(24, 5, 5,input_shape=(38, 160, 3),subsample=(2, 2)))	
 	model.add(Dropout(0.5))	
 	model.add(Convolution2D(36, 5, 5,subsample=(2, 2)))	
 	model.add(Dropout(0.5))	
@@ -74,21 +73,20 @@ def model_3():
     #input(38,160,3) output(36,88,24)
     model.add(Convolution2D(24, 3, 3,input_shape=(38, 160, 3),name='C1'))
     model.add(elu)
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.2))
     model.add(Convolution2D(36, 5, 5,name='C2'))
-    model.add(elu)
-    model.add(Dropout(0.5))
+    model.add(elu)              
+    model.add(Dropout(0.2))
     model.add(Convolution2D(48, 5, 5,name='C3'))
     model.add(elu)
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.2))
     model.add(Convolution2D(64, 3, 3,name='C4'))
     model.add(elu)
     model.add(Convolution2D(64, 3, 3,name='C5'))
     model.add(elu)
     model.add(Flatten())
-    model.add(Dense(100,name='L1'))
-    model.add(elu)
-    model.add(Dense(50,name='L2',activation='relu'))
+    model.add(Dense(200,activation='relu',name='L1'))
+    model.add(Dense(50,activation='relu',name='L2'))
     model.add(Dense(10,name='L3'))
     model.add(Dense(1,name='L4'))
     return model
@@ -118,12 +116,13 @@ X_normalized = normalize(X_train)
 print("Nomalizing finished.\n")
 
 #Complie
+Learning_Rate=0.001
 model = model_3()
-model.compile(Adam(lr=0.00001), loss='mse', metrics=['accuracy'])
+model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
 
 #Train
 history = model.fit(X_normalized, y_train, 
-	nb_epoch=5, 
+	nb_epoch=3, 
 	validation_split=0.05)
  	
 #Save Model
