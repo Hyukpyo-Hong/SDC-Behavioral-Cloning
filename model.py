@@ -73,20 +73,20 @@ def model_3():
     #input(38,160,3) output(36,88,24)
     model.add(Convolution2D(24, 3, 3,input_shape=(38, 160, 3),name='C1'))
     model.add(elu)
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.2))
     model.add(Convolution2D(36, 5, 5,name='C2'))
     model.add(elu)              
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.2))
     model.add(Convolution2D(48, 5, 5,name='C3'))
     model.add(elu)
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.2))
     model.add(Convolution2D(64, 3, 3,name='C4'))
     model.add(elu)
     model.add(Convolution2D(64, 3, 3,name='C5'))
     model.add(elu)
     model.add(Flatten())
-    model.add(Dense(100,activation='tanh',name='L1'))
-    model.add(Dense(50,activation='tanh',name='L2'))
+    model.add(Dense(200,activation='relu',name='L1'))
+    model.add(Dense(50,activation='relu',name='L2'))
     model.add(Dense(10,name='L3'))
     model.add(Dense(1,name='L4'))
     return model
@@ -122,7 +122,7 @@ model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
 
 #Train
 history = model.fit(X_normalized, y_train, 
-	nb_epoch=5, 
+	nb_epoch=3, 
 	validation_split=0.05)
  	
 #Save Model
