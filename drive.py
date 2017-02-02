@@ -22,7 +22,7 @@ app = Flask(__name__)
 model = None
 prev_image_array = None
 img_gen = None
-
+shape=(80,160)
 
 @sio.on('telemetry')
 def telemetry(sid, data):
@@ -34,10 +34,6 @@ def telemetry(sid, data):
     speed = data["speed"]
     # The current image from the center camera of the car
     imgString = data["image"]
-    
-    
-    
-    
 
 
     image = Image.open(BytesIO(base64.b64decode(imgString)))
@@ -45,24 +41,15 @@ def telemetry(sid, data):
     image_array = sp.imresize(image_array, size=shape, interp='cubic')
     image_array = image_array[27:65,:]
     
-
     
     a = -0.5
     b = 0.5
     grayscale_min = 0
     grayscale_max = 255
     image_array = a + ( ( (image_array - grayscale_min)*(b - a) )/( grayscale_max - grayscale_min ) )
-     
-
-
 
     transformed_image_array = image_array[None, :, :, :]
     
-    # This model currently assumes that the features of the model are just the images. Feel free to change this.
-    
-
-
-
     #steering_angle = float(model.predict(transformed_image_array, batch_size=1))
     steering_angle = float(model.predict_generator(img_gen.flow(transformed_image_array, batch_size=1), val_samples=1))
     # The driving model currently just outputs a constant throttle. Feel free to edit this.
