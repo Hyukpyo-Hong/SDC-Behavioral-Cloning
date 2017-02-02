@@ -94,9 +94,9 @@ def model_3():
 #mydata
 #data = np.genfromtxt('./driving_log_main.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3))
 #dummy
-data = np.genfromtxt('./dummy.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3))
+#data = np.genfromtxt('./dummy.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3))
 #udacity data
-#data = np.genfromtxt('./data/driving_log.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3), skip_header=1)
+data = np.genfromtxt('./data/driving_log.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3), skip_header=1)
 
 y_train = data['angle']
 X_train = np.empty([len(y_train),38,160,3]).astype(np.uint8) 
