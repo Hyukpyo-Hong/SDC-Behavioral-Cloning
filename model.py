@@ -34,6 +34,7 @@ from keras.layers.core import Dense, Activation, Flatten, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D   
 from keras.layers.advanced_activations import ELU
+from keras.optimizers import Adam
 
 def model_1():
 	model = Sequential()
@@ -93,9 +94,9 @@ def model_3():
 #mydata
 #data = np.genfromtxt('./driving_log_main.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3))
 #dummy
-#data = np.genfromtxt('./dummy.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3))
+data = np.genfromtxt('./dummy.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3))
 #udacity data
-data = np.genfromtxt('./data/driving_log.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3), skip_header=1)
+#data = np.genfromtxt('./data/driving_log.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3), skip_header=1)
 
 y_train = data['angle']
 X_train = np.empty([len(y_train),38,160,3]).astype(np.uint8) 
@@ -114,7 +115,7 @@ print("Nomalizing finished.\n")
 
 #Complie
 model = model_3()
-model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
+model.compile(Adam(lr=0.0001), loss='mse', metrics=['accuracy'])
 
 #Train
 history = model.fit(X_normalized, y_train, 

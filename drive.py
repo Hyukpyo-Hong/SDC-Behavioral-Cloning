@@ -24,6 +24,9 @@ prev_image_array = None
 img_gen = None
 shape=(80,160)
 
+ca = np.empty([38,160,3]).astype(np.uint8) 
+
+
 @sio.on('telemetry')
 def telemetry(sid, data):
     # The current steering angle of the car
@@ -49,6 +52,10 @@ def telemetry(sid, data):
     image_array = a + ( ( (image_array - grayscale_min)*(b - a) )/( grayscale_max - grayscale_min ) )
 
     transformed_image_array = image_array[None, :, :, :]
+
+    
+    ca=transformed_image_array
+    np.save("a",ca)
     
     #steering_angle = float(model.predict(transformed_image_array, batch_size=1))
     steering_angle = float(model.predict_generator(img_gen.flow(transformed_image_array, batch_size=1), val_samples=1))
