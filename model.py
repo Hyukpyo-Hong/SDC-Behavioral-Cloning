@@ -81,10 +81,10 @@ def model_3():
     model.add(Convolution2D(64, 3, 3,name='C5'))
     model.add(elu)
     model.add(Flatten())
-    model.add(Dense(200,name='L1'))
+    model.add(Dense(100,name='L1'))
     model.add(elu)
-    model.add(Dense(50,name='L2',activation='tanh'))
-    model.add(Dense(10,name='L3'))
+    model.add(Dense(50,name='L2',activation='relu'))
+    model.add(Dense(10,name='L3',activation='tanh'))
     model.add(Dense(1,name='L4'))
     return model
 
