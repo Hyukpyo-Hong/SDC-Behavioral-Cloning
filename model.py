@@ -4,29 +4,59 @@ import tensorflow as tf
 
 tf.python.control_flow_ops = tf
 
-#Normalize
-def normalize(image_data):
-    a = -1
-    b = 1
-    grayscale_min = 0
-    grayscale_max = 255
-    return a + ( ( (image_data - grayscale_min)*(b - a) )/( grayscale_max - grayscale_min ) )
-
 #Resizing
 from scipy.misc import imread
 import scipy.misc as sp
-def resize_and_crop():
-
-    length = len(y_train)
-    shape = (80,160)
+def flip_merge(data):
+    shape = (100,200)
+    length = len(data['imgc'])
+    X_train=[]
+    y_train=[]
+     
+    for i in range(3):        
+        if data[0][i]=='center':
+            for i, loc in zip(range(length),data['imgc']):
+                if(i==0):
+                    continue
+                else:
+                    image = sp.imresize(imread(loc),size=shape)
+                    X_train.append(image[30:96,:])                      
+                    y_train.append(data['angle'][i])
+                    print("Center camera resizing",i,"/",length)
+                    
+        elif data[0][i]=='left':
+            for i, loc in zip(range(length),data['imgl']):
+                if(i==0):
+                    continue
+                else:
+                    image = sp.imresize(imread(loc),size=shape)
+                    X_train.append(image[30:96,:])
+                    y_train.append(data['angle'][i]+0.25)
+                    print("Left camera resizing",i,"/",length)
+                    
+        elif data[0][i]=='right':
+            for i, loc in zip(range(length),data['imgr']):
+                if(i==0):
+                    continue
+                else:
+                    image = sp.imresize(imread(loc),size=shape)
+                    X_train.append(image[30:96,:])         
+                    y_train.append(data['angle'][i]-0.25)
+                    print("Right camera resizing",i,"/",length)            
+                    
+    print("Fliping..")
     
-    for i, loc in zip(range(length),data['img']):        
-        image = imread(loc)        
-        image = sp.imresize(image, size=shape, interp='cubic')
-        X_train[i] = image[27:65,:]              
-        print("Resize and crop: ",i,"/",length)        
-    print("Images size become :",X_train[0].shape)
-
+    y_train = np.array(y_train).astype(np.float32)
+    
+    a=[]
+    for i in range(len(X_train)):
+        a.append(np.fliplr(X_train[i]))
+    X_train = np.array(X_train)
+    X_train = np.vstack((X_train,a))
+    y_train = np.concatenate((y_train,-y_train))
+    print("X_train shape: ",X_train.shape)
+    print("y_train shape: ",y_train.shape)
+    return X_train, y_train
     
 #Model
 from keras.models import Sequential
@@ -34,41 +64,8 @@ from keras.layers.core import Dense, Activation, Flatten, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D   
 from keras.layers.advanced_activations import ELU
-from keras.optimizers import Adam
 
-def model_1():
-	model = Sequential()
-	model.add(Convolution2D(24, 5, 5,input_shape=(80, 160, 3),subsample=(2, 2)))
-	model.add(Convolution2D(36, 5, 5,subsample=(2, 2)))
-	model.add(Convolution2D(48, 5, 5,subsample=(2, 2)))
-	model.add(Convolution2D(64, 3, 3))
-	model.add(Convolution2D(64, 3, 3))
-	model.add(Flatten())
-	model.add(Dense(100,activation='relu'))
-	model.add(Dense(50,activation='relu'))
-	model.add(Dense(10))
-	model.add(Dense(1))
-	return model
-
-def model_2():
-	model = Sequential()
-	#input(80,160,3) output(24,88,24)
-	model.add(Convolution2D(24, 5, 5,input_shape=(80, 160, 3),subsample=(2, 2)))	
-	model.add(Dropout(0.5))	
-	model.add(Convolution2D(36, 5, 5,subsample=(2, 2)))	
-	model.add(Dropout(0.5))	
-	model.add(Convolution2D(48, 5, 5,subsample=(2, 2)))	
-	model.add(Dropout(0.5))
-	model.add(Convolution2D(64, 3, 3))		
-	model.add(Convolution2D(64, 3, 3))		
-	model.add(Flatten())
-	model.add(Dense(100,activation='relu'))
-	model.add(Dense(50,activation='relu'))
-	model.add(Dense(10))
-	model.add(Dense(1))
-	return model
-
-def model_3():
+def model():
     model = Sequential()
     elu = ELU(alpha=1.0)
     #input(38,160,3) output(36,88,24)
@@ -95,35 +92,24 @@ def model_3():
 
 #Data Loading
 
-#mydata
-#data = np.genfromtxt('./driving_log_main.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3))
 #dummy
-#data = np.genfromtxt('./dummy.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3))
-#udacity data
-data = np.genfromtxt('./data/driving_log.csv',dtype=[('img','U110'),('angle','f8')],delimiter=",",usecols=(0,3), skip_header=1)
+data = np.genfromtxt('./a.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
+#udacity
+#data = np.genfromtxt('./data/driving_log.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','U12')],delimiter=",",usecols=(0,1,2,3))
 
-y_train = data['angle']
-X_train = np.empty([len(y_train),38,160,3]).astype(np.uint8) 
-
-#resize and crop
-resize_and_crop()
+X_train, y_train = flip_merge(data)
 
 #Shuffle
 from sklearn.utils import shuffle
 X_train, y_train = shuffle(X_train, y_train) 
 
-#Pre-processing
-print("Nomalizing starts")
-X_normalized = normalize(X_train)
-print("Nomalizing finished.\n")
-
 #Complie
-model = model_3()
-model.compile(Adam(lr=0.00001), loss='mse', metrics=['accuracy'])
+model = model()
+model.compile(Adam(lr=0.0001), loss='mse', metrics=['accuracy'])
 
 #Train
 history = model.fit(X_normalized, y_train, 
-	nb_epoch=5, 
+	nb_epoch=3, 
 	validation_split=0.05)
  	
 #Save Model
