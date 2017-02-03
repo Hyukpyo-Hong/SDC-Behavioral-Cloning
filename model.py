@@ -7,8 +7,11 @@ tf.python.control_flow_ops = tf
 #Resizing
 from scipy.misc import imread
 import scipy.misc as sp
+
+
 def flip_merge(data):
-    shape = (100,200)
+
+    
     length = len(data['imgc'])
     X_train=[]
     y_train=[]
@@ -31,7 +34,7 @@ def flip_merge(data):
                 else:
                     image = sp.imresize(imread(loc),size=shape)
                     X_train.append(image[30:96,:])
-                    y_train.append(data['angle'][i]+0.25)
+                    y_train.append(data['angle'][i]+shift)
                     print("Left camera resizing",i,"/",length-1)
                     
         elif data[0][i]=='right':
@@ -41,13 +44,11 @@ def flip_merge(data):
                 else:
                     image = sp.imresize(imread(loc),size=shape)
                     X_train.append(image[30:96,:])         
-                    y_train.append(data['angle'][i]-0.25)
+                    y_train.append(data['angle'][i]-shift)
                     print("Right camera resizing",i,"/",length-1)            
                     
-    print("Fliping..")
-    
-    y_train = np.array(y_train).astype(np.float32)
-    
+    print("Fliping..")    
+    y_train = np.array(y_train).astype(np.float32)    
     a=[]
     for i in range(len(X_train)):
         a.append(np.fliplr(X_train[i]))
@@ -69,37 +70,53 @@ from keras.optimizers import Adam
 
 def model():
     model = Sequential()
-    elu = ELU(alpha=1.0)    
-    model.add(Convolution2D(24, 5, 5,input_shape=(66, 200, 3),subsample=(2, 2),name='C1'))
-    model.add(elu)
+    #input(80,160,3) output(24,88,24)
+    model.add(Convolution2D(24, 5, 5,input_shape=(66, 200, 3),subsample=(2, 2)))    
+    model.add(Dropout(0.5)) 
+    model.add(Convolution2D(36, 5, 5,subsample=(2, 2))) 
+    model.add(Dropout(0.5)) 
+    model.add(Convolution2D(48, 5, 5,subsample=(2, 2))) 
     model.add(Dropout(0.5))
-    model.add(Convolution2D(36, 5, 5,subsample=(2, 2), name='C2'))
-    model.add(elu)
-    model.add(Dropout(0.5))
-    model.add(Convolution2D(48, 5, 5,subsample=(2, 2),name='C3'))
-    model.add(elu)
-    model.add(Dropout(0.5))
-    model.add(Convolution2D(64, 3, 3,name='C4'))
-    model.add(elu)
-    model.add(Convolution2D(64, 3, 3,name='C5'))
-    model.add(elu)
+    model.add(Convolution2D(64, 3, 3))      
+    model.add(Convolution2D(64, 3, 3))      
     model.add(Flatten())
-    model.add(Dense(100,name='L1'))
-    model.add(elu)
-    model.add(Dense(50,name='L2'))    
-    model.add(elu)
-    model.add(Dense(10,name='L3'))
-    model.add(Dense(1,name='L4'))
+    model.add(Dense(100,activation='relu'))
+    model.add(Dense(50,activation='relu'))
+    model.add(Dense(10))
+    model.add(Dense(1))
     return model
 
 #Data Loading
 
-#dummy
-#data = np.genfromtxt('./a.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
-#udacity
-data = np.genfromtxt('./data/driving_log.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','U12')],delimiter=",",usecols=(0,1,2,3))
 
-X_train, y_train = flip_merge(data)
+
+epoch = 2
+shift = 0.25
+shape = (100,200)
+X_train = []
+y_train = []
+
+def save():
+    #dummy
+    data = np.genfromtxt('./a.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
+    #udacity
+    #data = np.genfromtxt('./data/driving_log.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
+    X_train, y_train = flip_merge(data)
+    np.save("X_train",X_train)
+    np.save("y_train",y_train)
+    return X_train, y_train
+    
+def load():
+    X_train = np.load("X_train.npy")
+    y_train = np.load("y_train.npy")    
+    return X_train, y_train
+    
+
+#X_train, y_train = save()
+print(X_train)
+X_train, y_train = load()
+print(X_train)
+
 
 #Shuffle
 from sklearn.utils import shuffle
@@ -107,7 +124,7 @@ X_train, y_train = shuffle(X_train, y_train)
 
 #Complie
 model = model()
-model.compile(Adam(lr=0.0001), loss='mse', metrics=['accuracy'])
+model.compile(Adam(lr=0.001), loss='mse', metrics=['accuracy'])
 
 def generator(X_train, y_train, batch_size):
     batch_train = np.zeros((batch_size, 66, 200, 3))
@@ -120,9 +137,12 @@ def generator(X_train, y_train, batch_size):
         yield batch_train, batch_angle
         
    
-generator = generator(X_train, y_train, 128)
-history = model.fit_generator(generator, len(X_train)
-                              , nb_epoch=4)
+#generator = generator(X_train, y_train, 128)
+#history = model.fit_generator(generator, len(X_train), nb_epoch=4)
+#Train
+history = model.fit(X_train, y_train, nb_epoch=epoch, validation_split=0.1)
+
+
 
 #Save Model
 from keras.models import load_model
