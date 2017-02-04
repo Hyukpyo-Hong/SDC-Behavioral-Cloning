@@ -2,3 +2,4 @@
 *.pem
 *.npy
 /data
+/Simulator
