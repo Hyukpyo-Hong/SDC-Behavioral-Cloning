@@ -113,16 +113,7 @@ def load():
     X_train = np.load("X_train.npy")
     y_train = np.load("y_train.npy")    
     return X_train, y_train
-    
-def generator(X_train, y_train, batch_size):
-    batch_train = np.zeros((batch_size, 66, 200, 3))
-    batch_angle = np.zeros(batch_size)   
-    while True:
-        for i in range(batch_size):            
-            batch_train[i] = X_train[i]
-            batch_angle[i] = y_train[i]            
-        yield batch_train, batch_angle
-        
+
 #Data initialize
 X_train = []
 y_train = []    
@@ -136,12 +127,14 @@ else:
 from sklearn.utils import shuffle
 from math import ceil
 X_train, y_train = shuffle(X_train, y_train) 
-
 training_idx = ceil(len(X_train)*(1-validate_portion))
 X_validate = X_train[training_idx:]
 y_validate = y_train[training_idx:]
 X_train = X_train[:training_idx]
 y_train = y_train[:training_idx]
+
+print("Training Set: ",X_train.shape)
+print("Validation Set: ",X_validate.shape)
 
 
 #Complie
@@ -150,19 +143,15 @@ model.compile(Adam(lr=learning_rate), loss='mse', metrics=['accuracy'])
 
 
 #Train   
-datagen = ImageDataGenerator(
-    featurewise_center=True,
-    featurewise_std_normalization=True)
+from keras.preprocessing.image import ImageDataGenerator
 
-datagen.fit(X_train)
-datagen.fit(X_validate)
-
-# fits the model on batches with real-time data augmentation:
-model.fit_generator(datagen.flow(X_train, Y_train, batch_size=128),
+datagen = ImageDataGenerator()
+model.fit_generator(datagen.flow(X_train, y_train, batch_size=128),
                     samples_per_epoch=len(X_train), 
                     nb_epoch=epoch,
                     validation_data=datagen.flow(X_validate, y_validate, batch_size=128), 
                     nb_val_samples=len(X_validate))
+
 #Save Model
 from keras.models import load_model
 
@@ -170,5 +159,3 @@ model.save('model.h5')
 print("Saved model to disk")
 #print(model.summary())
 
-#history = model.fit_generator(generator(X_train, y_train, 128), len(X_train), nb_epoch=epoch)
-#history = model.fit(X_train, y_train, nb_epoch=epoch, validation_split=0.1)
