@@ -6,7 +6,7 @@ tf.python.control_flow_ops = tf
 
 #Train Parameter
 epoch = 10
-shift = 0.25 #Additional value to left and right camera
+shift = 0.25 #Additional value to if there're images from left and right camera
 shape = (100,200) # Shape of resize before crop
 validate_portion = 0.05
 learning_rate = 0.001
@@ -57,13 +57,13 @@ def flip_merge(data):
     y_train=[]
     count=0 
     for i in range(3):        
-        if data[0][i]=='center':
-            for i, loc in zip(range(length),data['imgc']):
+        if data[0][i]=='center':            
+            for i, loc in zip(range(length),data['imgc']):                
                 if(i==0):
                     continue
                 else:
-                    try:                        
-                        image = sp.imresize(imread(loc),size=shape)
+                    try:                                                
+                        image = sp.imresize(imread(loc),size=shape)                        
                         X_train.append(image[30:96,:])                      
                         y_train.append(data['angle'][i])
                         print("Center camera resizing",i,"/",length-1)
@@ -71,12 +71,14 @@ def flip_merge(data):
                         count+=1
                         pass                    
         elif data[0][i]=='left':
-            for i, loc in zip(range(length),data['imgl']):
+            for i, loc in zip(range(length),data['imgl']):                
                 if(i==0):
                     continue
+                elif(len(loc)==0):
+                    break;
                 else:
                     try:
-                        image = sp.imresize(imread(loc),size=shape)
+                        image = sp.imresize(imread(loc),size=shape)                        
                         X_train.append(image[30:96,:])
                         y_train.append(data['angle'][i]+shift)
                         print("Left camera resizing",i,"/",length-1)
@@ -87,6 +89,8 @@ def flip_merge(data):
             for i, loc in zip(range(length),data['imgr']):
                 if(i==0):
                     continue
+                elif(len(loc)==0):
+                    break;
                 else:
                     try:
                         image = sp.imresize(imread(loc),size=shape)
@@ -95,7 +99,7 @@ def flip_merge(data):
                         print("Right camera resizing",i,"/",length-1)            
                     except OSError:
                         count+=1
-                        pass                                        
+                        pass                                            
     print(count,"files don't exist. Total number of imagaes is ",len(X_train)*2)
     print("Fliping..")    
     y_train = np.array(y_train).astype(np.float32)    
@@ -111,9 +115,9 @@ def flip_merge(data):
 
 def save():
     #dummy
-    data = np.genfromtxt('./dummy.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
+    #data = np.genfromtxt('./dummy.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
     #Real
-    data = np.genfromtxt('./data_mine/driving_log.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
+    data = np.genfromtxt('./DATAmine/driving_log.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
     X_train, y_train = flip_merge(data)
     np.save("X_train",X_train)
     np.save("y_train",y_train)
