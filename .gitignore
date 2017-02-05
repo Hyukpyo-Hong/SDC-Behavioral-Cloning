@@ -2,4 +2,5 @@
 *.pem
 *.npy
 /DATAmine
+/data
 /Simulator
