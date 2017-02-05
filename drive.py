@@ -38,18 +38,39 @@ def telemetry(sid, data):
         image_array = (image_array[30:96, :]) / 255. - .5
         steering_angle = float(model.predict(
             image_array[None, :, :, :], batch_size=1))
+#         if (abs(steering_angle) < 0.1):
+#             throttle = 0.2
+#         else:
+#             if (abs(steering_angle) < 0.15):
+#             	throttle = 0.05  # * 1./(steering_angle if steering_angle>0.1)
+#             else:
+#             	throttle = 0.01  # * 1./(steering_angle if steering_angle>0.1)
 
-        if (abs(steering_angle) < 0.1):
-            throttle = 0.2
+#         print("Angle: ", format(steering_angle, '.3f'),
+#               " Throttle: ", throttle, " Speed: ", speed)
+
+        global prev_angle
+        _diff = steering_angle - prev_angle
+        diff = abs(_diff)
+        if(speed < 6):
+            throttle = 0.6  # Boost when the car start with large degree
+        elif(diff > 0.05):
+            print("Angle stablizing. Original Angle: ",
+                  format(steering_angle, '.3f'))
+            steering_angle = prev_angle + _diff * 0.7
+            throttle = -0.3
         else:
-            if (abs(steering_angle) < 0.15):
-            	throttle = 0.05  # * 1./(steering_angle if steering_angle>0.1)
+            if (abs(steering_angle) < 0.1):
+                throttle = 0.5
+            elif (abs(steering_angle) < 0.15):
+                throttle = 0.2
+            elif (abs(steering_angle) < 0.2):
+                throttle = 0.1
+            elif (abs(steering_angle) < 0.25):
+                throttle = 0.05
             else:
-            	throttle = 0.01  # * 1./(steering_angle if steering_angle>0.1)
-
-        print("Angle: ", format(steering_angle, '.3f'),
-              " Throttle: ", throttle, " Speed: ", speed)
-
+                throttle = 0.01  # 3.75<
+        prev_angle = steering_angle
         send_control(steering_angle, throttle)
 
         # save frame
