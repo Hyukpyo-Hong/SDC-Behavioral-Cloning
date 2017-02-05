@@ -5,7 +5,7 @@ import tensorflow as tf
 tf.python.control_flow_ops = tf
 
 #Train Parameter
-epoch = 10
+epoch = 5
 shift = 0.25 #Additional value to if there're images from left and right camera
 shape = (100,200) # Shape of resize before crop
 validate_portion = 0.05
