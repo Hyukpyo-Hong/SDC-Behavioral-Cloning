@@ -5,12 +5,12 @@ import tensorflow as tf
 tf.python.control_flow_ops = tf
 
 #Train Parameter
-epoch = 1
+epoch = 10
 shift = 0.25 #Additional value to left and right camera
 shape = (100,200) # Shape of resize before crop
-validate_portion = 0.2
+validate_portion = 0.05
 learning_rate = 0.001
-data_create_or_load = 1 # 0: Create new Dataset/save 1: Load previous Dataset
+data_create_or_load = 0 # 0: Create new Dataset/save 1: Load previous Dataset
 
 #Model
 from keras.models import Sequential
@@ -55,38 +55,48 @@ def flip_merge(data):
     length = len(data['imgc'])
     X_train=[]
     y_train=[]
-     
+    count=0 
     for i in range(3):        
         if data[0][i]=='center':
             for i, loc in zip(range(length),data['imgc']):
                 if(i==0):
                     continue
                 else:
-                    image = sp.imresize(imread(loc),size=shape)
-                    X_train.append(image[30:96,:])                      
-                    y_train.append(data['angle'][i])
-                    print("Center camera resizing",i,"/",length-1)
-                    
+                    try:                        
+                        image = sp.imresize(imread(loc),size=shape)
+                        X_train.append(image[30:96,:])                      
+                        y_train.append(data['angle'][i])
+                        print("Center camera resizing",i,"/",length-1)
+                    except OSError:
+                        count+=1
+                        pass                    
         elif data[0][i]=='left':
             for i, loc in zip(range(length),data['imgl']):
                 if(i==0):
                     continue
                 else:
-                    image = sp.imresize(imread(loc),size=shape)
-                    X_train.append(image[30:96,:])
-                    y_train.append(data['angle'][i]+shift)
-                    print("Left camera resizing",i,"/",length-1)
-                    
+                    try:
+                        image = sp.imresize(imread(loc),size=shape)
+                        X_train.append(image[30:96,:])
+                        y_train.append(data['angle'][i]+shift)
+                        print("Left camera resizing",i,"/",length-1)
+                    except OSError:
+                        count+=1
+                        pass                                        
         elif data[0][i]=='right':
             for i, loc in zip(range(length),data['imgr']):
                 if(i==0):
                     continue
                 else:
-                    image = sp.imresize(imread(loc),size=shape)
-                    X_train.append(image[30:96,:])         
-                    y_train.append(data['angle'][i]-shift)
-                    print("Right camera resizing",i,"/",length-1)            
-                    
+                    try:
+                        image = sp.imresize(imread(loc),size=shape)
+                        X_train.append(image[30:96,:])         
+                        y_train.append(data['angle'][i]-shift)
+                        print("Right camera resizing",i,"/",length-1)            
+                    except OSError:
+                        count+=1
+                        pass                                        
+    print(count,"files don't exist. Total number of imagaes is ",len(X_train)*2)
     print("Fliping..")    
     y_train = np.array(y_train).astype(np.float32)    
     a=[]
@@ -96,14 +106,14 @@ def flip_merge(data):
     X_train = np.vstack((X_train,a))
     y_train = np.concatenate((y_train,-y_train))
     print("X_train shape: ",X_train.shape)
-    print("y_train shape: ",y_train.shape)
+    print("y_train shape: ",y_train.shape)    
     return X_train, y_train
 
 def save():
     #dummy
-    #data = np.genfromtxt('./dummy.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
-    #udacity
-    data = np.genfromtxt('./data/driving_log.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
+    data = np.genfromtxt('./dummy.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
+    #Real
+    data = np.genfromtxt('./data_mine/driving_log.csv',dtype=[('imgc','U110'),('imgl','U110'),('imgr','U110'),('angle','f8')],delimiter=",",usecols=(0,1,2,3))
     X_train, y_train = flip_merge(data)
     np.save("X_train",X_train)
     np.save("y_train",y_train)
@@ -121,6 +131,11 @@ if(data_create_or_load==0):
     X_train, y_train = save()
 else:
     X_train, y_train = load()
+
+
+#Nomalization
+X_train = X_train/255.-.5
+print("Normalized to -0.5~0.5")
 
 
 #Shuffle and Split into Train and Validate set
