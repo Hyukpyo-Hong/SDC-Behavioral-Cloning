@@ -137,9 +137,7 @@ else:
     X_train, y_train = load()
 
 
-#Nomalization
-X_train = X_train/255.-.5
-print("Normalized to -0.5~0.5")
+
 
 
 #Shuffle and Split into Train and Validate set
@@ -164,7 +162,11 @@ model.compile(Adam(lr=learning_rate), loss='mse', metrics=['accuracy'])
 #Train   
 from keras.preprocessing.image import ImageDataGenerator
 
-datagen = ImageDataGenerator()
+#Nomalization
+datagen = ImageDataGenerator(
+    featurewise_center=True)
+datagen.fit(X_train.astype(np.float32))
+datagen.fit(X_validate.astype(np.float32))
 model.fit_generator(datagen.flow(X_train, y_train, batch_size=128),
                     samples_per_epoch=len(X_train), 
                     nb_epoch=epoch,

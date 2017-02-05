@@ -33,34 +33,19 @@ def telemetry(sid, data):
         # The current image from the center camera of the car
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
-        image_array = np.asarray(image)
+        image_array = np.asarray(image).astype(np.float32)
         image_array = sp.imresize(image_array, size=shape)
         image_array = (image_array[30:96, :]) / 255. - .5
         steering_angle = float(model.predict(
             image_array[None, :, :, :], batch_size=1))
-        
-        global prev_angle
-        _diff = steering_angle - prev_angle
-        diff = abs(_diff)
-        if(speed < 15):
-            throttle = 0.6  # Boost when the car start with large degree                   
-        elif(diff>0.05):        	
-        	print("Angle stablizing. Original Angle: ",format(steering_angle, '.3f'))
-        	steering_angle = prev_angle + _diff*0.7
-        	throttle = -0.3        	
-        else:
-            if (abs(steering_angle) < 0.1):
-            	throttle = 0.5
-            elif (abs(steering_angle) < 0.15): 
-            	throttle = 0.2
-            elif (abs(steering_angle) < 0.2): 
-                throttle = 0.1
-            elif (abs(steering_angle) < 0.25): 
-                throttle = 0.05
-            else:
-                throttle = 0.01  # 3.75<
-        prev_angle = steering_angle
 
+        if (abs(steering_angle) < 0.1):
+            throttle = 0.2
+        else:
+            if (abs(steering_angle) < 0.15):
+            	throttle = 0.05  # * 1./(steering_angle if steering_angle>0.1)
+            else:
+            	throttle = 0.01  # * 1./(steering_angle if steering_angle>0.1)
 
         print("Angle: ", format(steering_angle, '.3f'),
               " Throttle: ", throttle, " Speed: ", speed)
@@ -129,19 +114,25 @@ if __name__ == '__main__':
     eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
 
 '''
-        global prev_angle
+global prev_angle
         _diff = steering_angle - prev_angle
         diff = abs(_diff)
-        if(diff >= 0 and diff < 0.05):
-            prev_angle = steering_angle
-        elif(diff >= 0.05 and diff < 0.95):
-            print("Angle stablizer ", "from: ", format(steering_angle, '.3f'))
-            steering_angle = prev_angle + _diff * (1.2 - diff)
-            prev_angle = steering_angle
-            print("                ", "  to: ", format(steering_angle, '.3f'))
+        if(speed < 15):
+            throttle = 0.6  # Boost when the car start with large degree                   
+        elif(diff>0.05):        	
+        	print("Angle stablizing. Original Angle: ",format(steering_angle, '.3f'))
+        	steering_angle = prev_angle + _diff*0.7
+        	throttle = -0.3        	
         else:
-            print("Angle stablizer ", "from: ", format(steering_angle, '.3f'))
-            steering_angle = prev_angle + _diff * 0.1
-            prev_angle = steering_angle
-            print("                ", "  to: ", format(steering_angle, '.3f'))
+            if (abs(steering_angle) < 0.1):
+            	throttle = 0.5
+            elif (abs(steering_angle) < 0.15): 
+            	throttle = 0.2
+            elif (abs(steering_angle) < 0.2): 
+                throttle = 0.1
+            elif (abs(steering_angle) < 0.25): 
+                throttle = 0.05
+            else:
+                throttle = 0.01  # 3.75<
+        prev_angle = steering_angle
 '''
