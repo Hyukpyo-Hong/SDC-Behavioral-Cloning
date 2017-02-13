@@ -62,8 +62,8 @@ def flip_merge(data):
 	aug_right_count=0
 	rows = 66
 	cols = 200
-	m_right = np.float32([[1,0,20],[0,1,0]])
-	m_left = np.float32([[1,0,-20],[0,1,0]])
+	m_right = np.float32([[1,0,10],[0,1,0]])
+	m_left = np.float32([[1,0,-10],[0,1,0]])
 	m_right2 = np.float32([[1,0,30],[0,1,0]])
 	m_left2 = np.float32([[1,0,-30],[0,1,0]])
 	for i in range(3):
@@ -80,18 +80,18 @@ def flip_merge(data):
 						if data['angle'][i] >0.1:							
 							temp = cv2.warpAffine(image,m_right,(cols,rows))
 							X_train.append(temp)
-							y_train.append(data['angle'][i]+0.2)
+							y_train.append(data['angle'][i]+0.1)
 							temp = cv2.warpAffine(image,m_right2,(cols,rows))
 							X_train.append(temp)
-							y_train.append(data['angle'][i]+0.25)
+							y_train.append(data['angle'][i]+0.3)
 							aug_right_count+=2
 						elif data['angle'][i] <-0.1:							
 							temp = cv2.warpAffine(image,m_left,(cols,rows))
 							X_train.append(temp)
-							y_train.append(data['angle'][i]-0.2)
+							y_train.append(data['angle'][i]-0.1)
 							temp = cv2.warpAffine(image,m_left2,(cols,rows))
 							X_train.append(temp)
-							y_train.append(data['angle'][i]-0.25)
+							y_train.append(data['angle'][i]-0.3)
 							aug_left_count+=2
 
 						print("Center camera resizing", i, "/", length - 1," (+ left Augmented: ",aug_left_count,", right Augmented: ",aug_right_count)
@@ -154,7 +154,7 @@ def save():
 	try:
 		with h5py.File('X_train.h5', 'w') as hf:
 			hf.create_dataset("X_train",  data=X_train)
-	except OSError:
+	except:
 		print("X_Train Cannot be Save")
 		pass
 	#np.save("X_train", X_train)
