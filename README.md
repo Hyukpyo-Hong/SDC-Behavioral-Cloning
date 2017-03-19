@@ -24,8 +24,9 @@ The goals/steps of this project are the followings
 [image7]: ./tranoriginal2.png "Original image before translation"
 [image8]: ./tran10px.png "After move 10px"
 [image9]: ./flipbefore.jpg "Original image"
-[image10]: ./flipafter "Flipped Image"
-[image11]: ./histogramafter "Histogram After"
+[image10]: ./flipafter.jpg "Flipped Image"
+[image11]: ./histogrambefore.png "Histogram Before"
+[image12]: ./histogramafter.png "Histogram After"
 
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.
@@ -130,8 +131,11 @@ I also flipped images and angles to make my imageset more be balanced. For examp
 ![alt text][image9]
 ![alt text][image10]
 
+
 After flip the imageset, the histogram of angle value became to below chart.
+#####[Left:Before / Right: After]#####
 ![alt text][image11]
+![alt text][image12]
 
 
 After the collection process, I had 52,442 number of data points. When I trained with preprocessed images by mean/std or min/max normalization, my car off the lane easily. So I trained without any image preprocessing, and it worked. Therefore, my model doesn’t have image preprocessing stage.
