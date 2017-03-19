@@ -36,13 +36,12 @@ def telemetry(sid, data):
 		image_array = sp.imresize(image_array, size=shape)
 		image_array = image_array[30:96, :]		
 		steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
-	
-		
-		if (abs(steering_angle) < 0.1):  # 2.5degree
-			throttle = 0.2
+			
+		if(speed < 10):
+			throttle = 0.7
 		else:
-			if(speed < 7):
-				throttle = 1
+			if (abs(steering_angle) < 0.1):  # 2.5degree
+				throttle = 0.2
 			elif (abs(steering_angle) < 0.15):  # 3.75degree
 				throttle = 0.1
 			else:

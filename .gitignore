@@ -1,6 +1,9 @@
 *.h5
 *.pem
 *.npy
-
+*.zip
+*.mp4
 /data
 /Simulator
+/a
+/b

@@ -5,7 +5,7 @@ import tensorflow as tf
 tf.python.control_flow_ops = tf
 
 # 1. Parameters
-data_create_or_load = 0  # 0: Create new Imageset and save, 1: Load previous Imageset
+data_create_or_load = 1  # 0: Create new Imageset and save, 1: Load previous Imageset
 shift = 0.25  # Additional value to angle from left and right camera
 shape = (100, 200)  # Size of resized image
 validate_portion = 0.01 
