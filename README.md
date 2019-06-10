@@ -1,6 +1,6 @@
-#**Traffic Sign Recognition**
 
-##Hyukpyo Hong February 13, 2017
+## **Traffic Sign Recognition**
+
 ---
 
 **Behavioral Cloning Project**
@@ -29,12 +29,12 @@ The goals/steps of this project are the followings
 [image12]: ./histogramafter.png "Histogram After"
 
 ## Rubric Points
-###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.
+### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.
     
 ---
-###Files Submitted & Code Quality
+### Files Submitted & Code Quality
 
-####1. Submission includes all required files and can be used to run the simulator in autonomous mode
+#### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
 My project includes the following files:
 
@@ -43,18 +43,18 @@ My project includes the following files:
 * model.h5 containing a trained convolutional neural network
 * writeup_report.pdf summarizing the results
 
-####2. Submission includes functional code
+#### 2. Submission includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing
 ```sh
 python drive.py model.h5
 ```
-####3. Submission code is usable and readable
+#### 3. Submission code is usable and readable
 
 The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
 ###Model Architecture and Training Strategy
 
-####1. An appropriate model architecture has been employed
+#### 1. An appropriate model architecture has been employed
 
 My model consists of a convolution neural network with
 
@@ -64,25 +64,25 @@ My model consists of a convolution neural network with
 and, linked to fully connected layers.
 Also, The model includes seven **ELU** layers to introduce nonlinearity.
 
-####2. Attempts to reduce overfitting in the model
+#### 2. Attempts to reduce overfitting in the model
 
 The model contains five **dropout layers**(rate=0.4) in order to reduce overfitting.
 
 The model was trained and validated on different data sets to ensure that the model was not overfitting. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
-####3. Model parameter tuning
+#### 3. Model parameter tuning
 
 The model used an **Adam** optimizer, so the learning rate was not tuned manually.
 
-####4. Appropriate training data
+#### 4. Appropriate training data
 
 Training data was chosen to keep the vehicle driving on the road. I used images of good driving, recovering images from the left and right sides of the road. Those images are recorded by a center, left, and right cameras. And I flip and translated to the right and left to get a more various situation.
 
 For details about how I created the training data, see the next section.
 
-###Model Architecture and Training Strategy
+### Model Architecture and Training Strategy
 
-####1. Solution Design Approach
+#### 1. Solution Design Approach
 
 The overall strategy for deriving a model architecture was to follow the existing model, and add more layers when necessary.
 
@@ -94,7 +94,7 @@ To combat the overfitting, I modified the model a lot of time. Actually, MSE fac
 
 Then I tested with ELU activation which can produce negative values, and the car of simulator moved more distance. The next problem was the car easily failed on the curved lane and zigzagged during its driving. So I augmented the imageset for training to make them more focused on the curved lane, and lowered the throttle value, since my laptop is an old model, so it cannot process images quickly which resulted in a zigzag movement.
 
-####2. Final Model Architecture
+#### 2. Final Model Architecture
 
 The final model architecture (model.py lines 25-48) consisted of a convolution neural network
 
@@ -102,7 +102,7 @@ Here is a summary of the architecture.
 
 ![alt text][image1]
 
-####3. Creation of the Training Set & Training Process
+#### 3. Creation of the Training Set & Training Process
 
 To capture good driving behavior, I first recorded several laps on track one using center lane driving. Here is an example image of center lane driving,
 
@@ -115,25 +115,25 @@ I then recorded the vehicle recovering from the side of the lane to center, so t
 
 To augment the data set, I translated the image with openCV. If angle value of the image is more than 0.1, I moved the image 10px toward the right or left, and add +-0.15 on original value. Also, if angle value of the image is more than 0.3, I moved the image 30px toward the right or left, and add +-0.35 on original value. Here are sample images
 
-#####[Left:Original, Angle:0.15 / Right:Move to right 10px, Angle 0.3]#####
+##### [Left:Original, Angle:0.15 / Right:Move to right 10px, Angle 0.3]#####
 
 ![alt text][image7]
 ![alt text][image8]
 
-#####[Left:Original, Angle:0.31 / Right:Move to right 35px, Angle 0.66]#####
+##### [Left:Original, Angle:0.31 / Right:Move to right 35px, Angle 0.66]#####
 
 ![alt text][image5]
 ![alt text][image6]
 
 I also flipped images and angles to make my imageset more be balanced. For example, here is an image that is flipped:
 
-#####[Left:Original, Angle:0.5 / Right:Flipped image, Angle -0.5]#####
+##### [Left:Original, Angle:0.5 / Right:Flipped image, Angle -0.5]#####
 ![alt text][image9]
 ![alt text][image10]
 
 
 After flip the imageset, the histogram of angle value became to below chart.
-#####[Left:Before / Right: After]#####
+##### [Left:Before / Right: After]#####
 ![alt text][image11]
 ![alt text][image12]
 
